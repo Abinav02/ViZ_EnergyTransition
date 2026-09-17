@@ -21,6 +21,24 @@ const colorScale = d3.scaleLinear()
     .range(BLUE_STOPS)
     .clamp(true);
 
+// ---------- Six-band colors (match the stacked-area palette) ----------
+const BAND_COLORS = {
+    fossil:   "#4d4d4d",   // dark grey
+    nuclear:  "#9e6bb0",   // purple
+    hydro:    "#1f78b4",   // blue
+    wind:     "#4daf4a",   // green
+    solar:    "#ffb300",   // amber
+    bioOther: "#8dd3c7",   // light teal
+};
+const BAND_LABELS = {
+    fossil:   "Fossil",
+    nuclear:  "Nuclear",
+    hydro:    "Hydro",
+    wind:     "Wind",
+    solar:    "Solar",
+    bioOther: "Bio+Other",
+};
+
 // ---------- Shared tooltip ----------
 let tooltip;
 function getTooltip() {
@@ -33,6 +51,69 @@ function getTooltip() {
             .style("opacity", 0);
     }
     return tooltip;
+}
+
+// ---------- Helpers ----------
+
+// Extract the six-band split from a raw data row.
+// Returns null if there's no row (shouldn't happen — cells always have a source).
+function sixBandSplit(row) {
+    if (!row) return null;
+    const num = v => (v == null || Number.isNaN(v)) ? 0 : Number(v);
+    return {
+        fossil:   num(row.coal_share_elec) + num(row.gas_share_elec) + num(row.oil_share_elec),
+        nuclear:  num(row.nuclear_share_elec),
+        hydro:    num(row.hydro_share_elec),
+        wind:     num(row.wind_share_elec),
+        solar:    num(row.solar_share_elec),
+        bioOther: num(row.other_renewables_share_elec), // includes biofuel — do not add biofuel_share_elec
+    };
+}
+
+// Render the mini-bar + labels HTML for the tooltip.
+function buildSplitHTML(split) {
+    if (!split) return "";
+
+    const order = ["fossil", "nuclear", "hydro", "wind", "solar", "bioOther"];
+    const total = order.reduce((sum, k) => sum + split[k], 0) || 1;
+
+    // Mini horizontal bar: each band is a span with proportional width
+    const barSegments = order
+        .filter(k => split[k] > 0.05)   // skip invisible slices
+        .map(k => {
+            const pct = (split[k] / total) * 100;
+            const title = `${BAND_LABELS[k]}: ${split[k].toFixed(1)}%`;
+            return `<span title="${title}" style="
+                display:inline-block;
+                width:${pct}%;
+                height:8px;
+                background:${BAND_COLORS[k]};
+            "></span>`;
+        })
+        .join("");
+
+    // Text rows: only bands that are actually present
+    const textRows = order
+        .filter(k => split[k] > 0.05)
+        .map(k => `
+            <div style="display:flex;justify-content:space-between;gap:12px;font-size:11px;line-height:1.5">
+                <span><span style="display:inline-block;width:8px;height:8px;
+                    background:${BAND_COLORS[k]};margin-right:5px;vertical-align:middle"></span>${BAND_LABELS[k]}</span>
+                <span style="color:#333">${split[k].toFixed(1)}%</span>
+            </div>
+        `)
+        .join("");
+
+    return `
+        <hr style="margin:6px 0;border:none;border-top:1px solid #eee"/>
+        <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">
+            Source breakdown
+        </div>
+        <div style="display:flex;height:8px;border-radius:2px;overflow:hidden;margin-bottom:6px">
+            ${barSegments}
+        </div>
+        <div>${textRows}</div>
+    `;
 }
 
 // ---------- Main render ----------
@@ -73,14 +154,16 @@ export function renderHeatmap(container, state) {
         return;
     }
 
-    // ---- Assemble year -> value per row ----
+    // ---- Assemble year -> value + source row per row ----
     const years = d3.range(YEAR_MIN, YEAR_MAX + 1);
     rows.forEach(r => {
         const byYear = new Map(
-            r.rows.map(d => [Number(d.year), d.low_carbon_share_elec])
+            r.rows.map(d => [Number(d.year), d])
         );
+        r.byYear = byYear;
         r.values = years.map(y => {
-            const v = byYear.get(y);
+            const d = byYear.get(y);
+            const v = d?.low_carbon_share_elec;
             return v == null || Number.isNaN(v) ? null : Number(v);
         });
     });
@@ -137,15 +220,17 @@ export function renderHeatmap(container, state) {
         .ease(d3.easeCubicOut)
         .style("opacity", 1);
 
-    // ---- Flatten cells ----
+    // ---- Flatten cells (carry the source row for the tooltip) ----
     const flat = [];
     rows.forEach(r => {
         r.values.forEach((v, i) => {
+            const year = years[i];
             flat.push({
                 name: r.name,
-                year: years[i],
+                year,
                 value: v,
                 delta: r.delta,
+                source: r.byYear.get(year) || null,
             });
         });
     });
@@ -171,14 +256,18 @@ export function renderHeatmap(container, state) {
     const tip = getTooltip();
     cells
         .on("mouseover", (event, d) => {
-            tip.style("opacity", 1).html(
-                `<strong>${d.name}</strong><br/>` +
-                `Year: ${d.year}<br/>` +
-                `Low-carbon: ${d.value == null
-                    ? "<em>no data</em>"
-                    : d.value.toFixed(1) + "%"}<br/>` +
-                `Δ 1985→2025: ${d.delta.toFixed(1)} pp`
-            );
+            const split = sixBandSplit(d.source);
+            const header =
+                `<div style="font-size:12px;margin-bottom:4px">
+                    <strong>${d.name}</strong> · ${d.year}
+                </div>
+                <div style="font-size:11px;color:#555">
+                    Low-carbon: <strong>${d.value == null
+                    ? "no data"
+                    : d.value.toFixed(1) + "%"}</strong><br/>
+                    Δ 1985→2025: ${d.delta.toFixed(1)} pp
+                </div>`;
+            tip.style("opacity", 1).html(header + buildSplitHTML(split));
         })
         .on("mousemove", event => {
             tip.style("left", (event.pageX + 12) + "px")
@@ -243,7 +332,7 @@ export function renderHeatmap(container, state) {
             .on("click", () => backToContinents());
     }
 
-    // ---- Caption: hatched cells + coverage caveat ----
+    // ---- Caption ----
     d3.select(el).append("p")
         .attr("class", "heatmap-note")
         .text("Hatched cells indicate years with no reported data for that entity. " +
