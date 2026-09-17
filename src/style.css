@@ -1,0 +1,191 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f6f8;
+    color: #1a1a1a;
+    line-height: 1.5;
+}
+
+/* ---------- Page header ---------- */
+#page-header {
+    background: linear-gradient(180deg, #0b2545 0%, #123a6b 100%);
+    color: #ffffff;
+    padding: 32px 32px 28px;
+    border-bottom: 3px solid #2171b5;
+}
+
+.header-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+#page-header h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+#page-header .subtitle {
+    margin: 0;
+    font-size: 15px;
+    color: #c6dbef;
+    max-width: 720px;
+}
+
+/* ---------- Main grid ---------- */
+#app {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 28px 32px 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* ---------- Panels ---------- */
+.view-container {
+    background: #ffffff;
+    border: 1px solid #e1e5ea;
+    border-radius: 10px;
+    padding: 22px;
+    min-width: 0;
+    box-shadow: 0 1px 3px rgba(11, 37, 69, 0.04);
+}
+
+.heatmap-container {
+    grid-column: 1 / -1;
+    min-height: 480px;
+}
+
+#scatterplot-container,
+#stacked-area-container {
+    min-height: 400px;
+}
+
+#stacked-area-container {
+    grid-column: 1 / -1;
+}
+
+/* ---------- Panel header ---------- */
+.view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    gap: 16px;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    color: #0b2545;
+    letter-spacing: -0.1px;
+}
+
+button {
+    border: 1px solid #ccc;
+    background: #ffffff;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    white-space: nowrap;
+    color: #0b2545;
+    transition: background 0.15s ease;
+}
+
+button:hover {
+    background: #f0f4f9;
+}
+
+/* ---------- Heatmap ---------- */
+#heatmap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+#heatmap svg {
+    display: block;
+}
+
+#heatmap .x-axis text,
+#heatmap .y-axis text {
+    font-size: 11px;
+    fill: #555;
+}
+
+/* ---------- Heatmap caption (hatch + coverage note) ---------- */
+.heatmap-note {
+    font-size: 11px;
+    font-style: italic;
+    color: #777;
+    margin: 12px 0 0;
+    line-height: 1.4;
+}
+
+/* ---------- Legend ---------- */
+.legend-wrap {
+    display: block;
+}
+
+.legend-wrap svg {
+    display: block;
+    overflow: visible;
+}
+
+.heatmap-legend {
+    display: block;
+}
+
+/* ---------- Tooltip ---------- */
+.heatmap-tooltip {
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+}
+
+/* ---------- Page footer ---------- */
+#page-footer {
+    background: #0b2545;
+    color: #8fa9c9;
+    text-align: center;
+    padding: 20px 32px;
+    font-size: 12px;
+}
+
+#page-footer p {
+    margin: 0;
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 900px) {
+    #app {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    #page-header {
+        padding: 24px 20px;
+    }
+    #page-header h1 {
+        font-size: 24px;
+    }
+}

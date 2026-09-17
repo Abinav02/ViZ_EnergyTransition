@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Energy Transition</title>
+    <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+<header id="page-header">
+    <div class="header-inner">
+        <h1>Global Energy Transition</h1>
+        <p class="subtitle">
+            How the world's electricity mix has shifted from fossil fuels
+            toward low-carbon sources, 1985–2025.
+        </p>
+    </div>
+</header>
+
+<main id="app">
+    <section class="view-container heatmap-container" id="heatmap-container">
+        <div id="heatmap"></div>
+    </section>
+
+    <section class="view-container" id="scatterplot-container">
+        <div id="scatterplot"></div>
+    </section>
+
+    <section class="view-container" id="stacked-area-container">
+        <div id="stacked-area"></div>
+    </section>
+</main>
+
+<footer id="page-footer">
+    <p>Dataset: Our World in Data — Energy dataset.</p>
+</footer>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
