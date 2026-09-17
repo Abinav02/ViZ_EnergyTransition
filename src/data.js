@@ -39,6 +39,7 @@ const HISTORICAL_EXCLUDE = new Set([
     "DDR",  // East Germany
     "ANT",  // Netherlands Antilles
     "SCG",  // Serbia and Montenegro
+    "ATA",  // Antarctica
 ]);
 
 function isUsableRow(d) {
@@ -136,6 +137,71 @@ function fillLowCarbonShare(rows) {
     return rows;
 }
 
+// ---------- Audits ----------
+
+// Which entities still have a null low_carbon_share_elec in 1985 or 2025
+// after the fill? Those are the ones whose Δ would previously have been
+// inflated by the ?? 0 default.
+function auditEndpoints(rows) {
+    const byEntity = d3.group(rows, d => d.country);
+    const missing85 = [];
+    const missing25 = [];
+    byEntity.forEach((entityRows, name) => {
+        const r85 = entityRows.find(d => Number(d.year) === YEAR_MIN);
+        const r25 = entityRows.find(d => Number(d.year) === YEAR_MAX);
+        if (r85 && r85.low_carbon_share_elec == null) missing85.push(name);
+        if (r25 && r25.low_carbon_share_elec == null) missing25.push(name);
+    });
+    if (missing85.length) {
+        console.warn(
+            `[data] endpoints null in ${YEAR_MIN}:`, missing85
+        );
+    }
+    if (missing25.length) {
+        console.warn(
+            `[data] endpoints null in ${YEAR_MAX}:`, missing25
+        );
+    }
+    console.log(
+        `[data] endpoint audit — missing ${YEAR_MIN}: ${missing85.length}, ` +
+        `missing ${YEAR_MAX}: ${missing25.length}`
+    );
+}
+
+// Which iso_codes appear in the CSV but are NOT in continent-map.js?
+// These would silently vanish from any continent drill-down.
+function auditContinentCoverage(rows, cMap) {
+    const isoSet = new Set();
+    rows.forEach(d => {
+        if (typeof d.iso_code === "string" && d.iso_code.length === 3) {
+            isoSet.add(d.iso_code);
+        }
+    });
+    const unmapped = [];
+    isoSet.forEach(iso => {
+        if (!cMap[iso]) unmapped.push(iso);
+    });
+
+    if (unmapped.length === 0) {
+        console.log("[data] continent coverage: complete ✓");
+        return;
+    }
+
+    // Build a code -> country name map for the missing ones
+    const countryByIso = {};
+    rows.forEach(d => {
+        if (unmapped.includes(d.iso_code) && !countryByIso[d.iso_code]) {
+            countryByIso[d.iso_code] = d.country;
+        }
+    });
+
+    console.warn(
+        `[data] ${unmapped.length} iso_codes not in continent-map.js — ` +
+        `these will not appear in any continent drill-down:`
+    );
+    console.table(countryByIso);
+}
+
 // ---------- Load ----------
 
 export async function loadData() {
@@ -160,8 +226,13 @@ export async function loadData() {
     // Reconstruct missing low_carbon_share_elec from components
     raw = fillLowCarbonShare(raw);
 
+    // Load continent map, then audit coverage
     continentMap = await loadContinentMap();
     console.log("[data] continent map size:", Object.keys(continentMap).length);
+
+    // ---- Audits (console output only, no data mutation) ----
+    auditEndpoints(raw);
+    auditContinentCoverage(raw, continentMap);
 
     return raw;
 }
@@ -202,17 +273,30 @@ export function fossilShare(d) {
     return FOSSIL_COLS.reduce((sum, key) => sum + (d[key] || 0), 0);
 }
 
+// Δ low-carbon share between the first and last *non-null* years
+// for one entity. Never defaults missing endpoints to 0 — that would
+// artificially inflate Δ for entities with no data at either end.
 export function deltaLowCarbon(rowsForOneEntity) {
     const sorted = rowsForOneEntity
         .slice()
         .sort((a, b) => Number(a.year) - Number(b.year));
-    const first = sorted[0];
-    const last = sorted[sorted.length - 1];
-    if (!first || !last) return null;
-    return (
-        (last.low_carbon_share_elec ?? 0) -
-        (first.low_carbon_share_elec ?? 0)
-    );
+
+    // Walk from both ends to find the first and last non-null values.
+    let first = null;
+    for (const d of sorted) {
+        if (d.low_carbon_share_elec != null) { first = d; break; }
+    }
+    let last = null;
+    for (let i = sorted.length - 1; i >= 0; i--) {
+        if (sorted[i].low_carbon_share_elec != null) {
+            last = sorted[i];
+            break;
+        }
+    }
+
+    if (!first || !last || first.year === last.year) return null;
+
+    return last.low_carbon_share_elec - first.low_carbon_share_elec;
 }
 
 export function groupByEntity(rows) {

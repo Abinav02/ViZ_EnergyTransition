@@ -204,7 +204,57 @@ const CONTINENT_MAP = {
     SLB: "Oceania",
     TON: "Oceania",
     TUV: "Oceania",
-    VUT: "Oceania"
+    VUT: "Oceania",
+
+    // Territories and special cases OWID reports separately.
+    // Grouped by the continent they're conventionally associated with.
+    PSE: "Asia",           // Palestine
+    HKG: "Asia",           // Hong Kong
+    MAC: "Asia",           // Macao
+    GRL: "North America",  // Greenland (politically Denmark, geographically NA)
+    BMU: "North America",  // Bermuda
+    GUM: "Oceania",        // Guam
+    ASM: "Oceania",        // American Samoa
+    MNP: "Oceania",        // Northern Mariana Islands
+    PYF: "Oceania",        // French Polynesia
+    NCL: "Oceania",        // New Caledonia
+    COK: "Oceania",        // Cook Islands
+    NIU: "Oceania",        // Niue
+    WLF: "Oceania",        // Wallis and Futuna
+    TKL: "Oceania",        // Tokelau
+    PCN: "Oceania",        // Pitcairn
+    NFK: "Oceania",        // Norfolk Island
+    CXR: "Asia",           // Christmas Island (Australian, in Asia)
+    CCK: "Asia",           // Cocos Islands
+    IOT: "Asia",           // British Indian Ocean Territory
+    ESH: "Africa",         // Western Sahara
+    REU: "Africa",         // Réunion
+    MYT: "Africa",         // Mayotte
+    SHN: "Africa",         // Saint Helena
+    SPM: "North America",  // Saint Pierre and Miquelon
+    AIA: "North America",  // Anguilla
+    VGB: "North America",  // British Virgin Islands
+    CYM: "North America",  // Cayman Islands
+    MSR: "North America",  // Montserrat
+    TCA: "North America",  // Turks and Caicos
+    SXM: "North America",  // Sint Maarten
+    MAF: "North America",  // Saint Martin
+    BLM: "North America",  // Saint Barthélemy
+    CUW: "North America",  // Curaçao
+    ABW: "North America",  // Aruba
+    BES: "North America",  // Bonaire
+    SGS: "South America",  // South Georgia
+    FLK: "South America",  // Falklands
+    GUF: "South America",  // French Guiana
+    // Territories added after coverage audit
+    FRO: "Europe",           // Faroe Islands
+    GIB: "Europe",           // Gibraltar
+    GLP: "North America",    // Guadeloupe
+    MTQ: "North America",    // Martinique
+    PRI: "North America",    // Puerto Rico
+    VIR: "North America",    // US Virgin Islands
+
+
 };
 
 export async function loadContinentMap() {
