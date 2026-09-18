@@ -107,6 +107,31 @@ function linearFit(points) {
     return x => intercept + slope * Math.log10(x);
 }
 
+// D3's default log ticks include every minor value (600, 700, 800, ...),
+// which becomes unreadable on a wide GDP domain. Keep only conventional
+// 1-2-5 major ticks and thin them further when the panel is narrow.
+function logTickValues(domain, width) {
+    const [min, max] = domain;
+    const firstPower = Math.floor(Math.log10(min));
+    const lastPower = Math.ceil(Math.log10(max));
+    const candidates = [];
+
+    for (let power = firstPower; power <= lastPower; power++) {
+        const magnitude = 10 ** power;
+        [1, 2, 5].forEach(multiplier => {
+            const value = multiplier * magnitude;
+            if (value >= min && value <= max) candidates.push(value);
+        });
+    }
+
+    const maxTicks = Math.max(4, Math.floor(width / 105));
+    if (candidates.length <= maxTicks) return candidates;
+
+    return Array.from({ length: maxTicks }, (_, i) =>
+        candidates[Math.round(i * (candidates.length - 1) / (maxTicks - 1))]
+    ).filter((value, i, values) => i === 0 || value !== values[i - 1]);
+}
+
 function drawLegend(container, continents) {
     const legend = d3.select(container).append("div").attr("class", "scatter-legend");
     continents.forEach(continent => {
@@ -255,7 +280,7 @@ export function renderScatterplot(container, state) {
         });
 
     const xAxis = d3.axisBottom(x)
-        .ticks(6, "~s")
+        .tickValues(logTickValues(x.domain(), innerW))
         .tickFormat(d3.format("$~s"));
     g.append("g").attr("class", "scatter-x-axis")
         .attr("transform", `translate(0,${innerH})`).call(xAxis);
