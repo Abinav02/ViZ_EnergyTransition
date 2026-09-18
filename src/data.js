@@ -257,6 +257,23 @@ export function getCountriesInContinent(continent) {
     );
 }
 
+// Every real country, with aggregate and historical rows excluded.
+// Useful for overview views that encode continent as a visual channel rather
+// than aggregating the countries into six regional marks.
+export function getAllCountryRows() {
+    return raw.filter(
+        d =>
+            typeof d.iso_code === "string" &&
+            d.iso_code.length === 3 &&
+            continentMap[d.iso_code] &&
+            inYearRange(d)
+    );
+}
+
+export function getContinentForIso(isoCode) {
+    return continentMap[isoCode] ?? null;
+}
+
 // Level 2 — full time series for a single country or aggregate
 export function getCountryRows(countryName) {
     return raw.filter(d => d.country === countryName && inYearRange(d));
