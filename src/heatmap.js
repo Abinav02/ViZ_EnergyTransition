@@ -7,21 +7,21 @@ import {
     getCountriesInContinent,
     rankByDelta,
 } from "./data.js";
+import { deltaWithWindow, describeWindow } from "./metric.js";
 import { selectContinent, selectCountry, backToContinents } from "./state.js";
 
-// ---------- Layout constants ----------
+// Layout constants
 const MARGIN = { top: 10, right: 30, bottom: 40, left: 160 };
 const CELL_H = 22;
 const YEAR_W = 14;
 
-// ---------- Sequential blues, hand-picked stops ----------
 const BLUE_STOPS = ["#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b"];
 const colorScale = d3.scaleLinear()
     .domain([0, 25, 50, 75, 100])
     .range(BLUE_STOPS)
     .clamp(true);
 
-// ---------- Six-band colors (match the stacked-area palette) ----------
+// Six-band colors
 const BAND_COLORS = {
     fossil:   "#4d4d4d",   // dark grey
     nuclear:  "#9e6bb0",   // purple
@@ -39,7 +39,7 @@ const BAND_LABELS = {
     bioOther: "Bio+Other",
 };
 
-// ---------- Shared tooltip ----------
+// Shared tooltip
 let tooltip;
 function getTooltip() {
     if (!tooltip) {
@@ -53,10 +53,10 @@ function getTooltip() {
     return tooltip;
 }
 
-// ---------- Helpers ----------
+// Helper functions
 
 // Extract the six-band split from a raw data row.
-// Returns null if there's no row (shouldn't happen — cells always have a source).
+// Returns null if there's no row
 function sixBandSplit(row) {
     if (!row) return null;
     const num = v => (v == null || Number.isNaN(v)) ? 0 : Number(v);
@@ -77,7 +77,7 @@ function buildSplitHTML(split) {
     const order = ["fossil", "nuclear", "hydro", "wind", "solar", "bioOther"];
     const total = order.reduce((sum, k) => sum + split[k], 0) || 1;
 
-    // Mini horizontal bar: each band is a span with proportional width
+
     const barSegments = order
         .filter(k => split[k] > 0.05)   // skip invisible slices
         .map(k => {
@@ -92,7 +92,7 @@ function buildSplitHTML(split) {
         })
         .join("");
 
-    // Text rows: only bands that are actually present
+
     const textRows = order
         .filter(k => split[k] > 0.05)
         .map(k => `
@@ -116,7 +116,7 @@ function buildSplitHTML(split) {
     `;
 }
 
-// ---------- Main render ----------
+// Main render
 export function renderHeatmap(container, state) {
     const el = typeof container === "string"
         ? document.querySelector(container)
@@ -129,7 +129,7 @@ export function renderHeatmap(container, state) {
 
     d3.select(el).selectAll("*").remove();
 
-    // ---- Pick data slice based on drill level ----
+
     let rows;
     let titleText;
 
@@ -154,7 +154,7 @@ export function renderHeatmap(container, state) {
         return;
     }
 
-    // ---- Assemble year -> value + source row per row ----
+    // Assemble year = value + source row per row
     const years = d3.range(YEAR_MIN, YEAR_MAX + 1);
     rows.forEach(r => {
         const byYear = new Map(
@@ -166,9 +166,11 @@ export function renderHeatmap(container, state) {
             const v = d?.low_carbon_share_elec;
             return v == null || Number.isNaN(v) ? null : Number(v);
         });
+
+        r.window = deltaWithWindow(r.rows);
     });
 
-    // ---- Geometry ----
+
     const innerW = years.length * YEAR_W;
     const innerH = rows.length * CELL_H;
     const width  = MARGIN.left + innerW + MARGIN.right;
@@ -184,7 +186,7 @@ export function renderHeatmap(container, state) {
         .range([0, innerH])
         .paddingInner(0.08);
 
-    // ---- SVG ----
+    // SVG
     const svg = d3.select(el)
         .append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`)
@@ -192,7 +194,7 @@ export function renderHeatmap(container, state) {
         .attr("height", height)
         .style("overflow", "visible");
 
-    // ---- No-data hatch pattern ----
+    // No-data hatch pattern
     const defs = svg.append("defs");
     const hatch = defs.append("pattern")
         .attr("id", "no-data-hatch")
@@ -213,14 +215,14 @@ export function renderHeatmap(container, state) {
     const g = svg.append("g")
         .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
 
-    // ---- Fade in on render ----
+
     g.style("opacity", 0)
         .transition()
         .duration(400)
         .ease(d3.easeCubicOut)
         .style("opacity", 1);
 
-    // ---- Flatten cells (carry the source row for the tooltip) ----
+
     const flat = [];
     rows.forEach(r => {
         r.values.forEach((v, i) => {
@@ -230,12 +232,13 @@ export function renderHeatmap(container, state) {
                 year,
                 value: v,
                 delta: r.delta,
+                window: r.window,
                 source: r.byYear.get(year) || null,
             });
         });
     });
 
-    // ---- Draw cells ----
+    // Draw cells
     const cells = g.append("g")
         .attr("class", "cells")
         .selectAll("rect")
@@ -252,7 +255,7 @@ export function renderHeatmap(container, state) {
         .attr("stroke-width", 0.5)
         .style("cursor", "pointer");
 
-    // ---- Tooltip ----
+
     const tip = getTooltip();
     cells
         .on("mouseover", (event, d) => {
@@ -265,7 +268,7 @@ export function renderHeatmap(container, state) {
                     Low-carbon: <strong>${d.value == null
                     ? "no data"
                     : d.value.toFixed(1) + "%"}</strong><br/>
-                    Δ 1985→2025: ${d.delta.toFixed(1)} pp
+                    ${describeWindow(d.window)}
                 </div>`;
             tip.style("opacity", 1).html(header + buildSplitHTML(split));
         })
@@ -275,7 +278,7 @@ export function renderHeatmap(container, state) {
         })
         .on("mouseout", () => tip.style("opacity", 0));
 
-    // ---- Click to drill / select ----
+    // Click to select
     cells.on("click", (event, d) => {
         if (state.level === "continent") {
             selectContinent(d.name);
@@ -284,7 +287,7 @@ export function renderHeatmap(container, state) {
         }
     });
 
-    // ---- Highlight selected country ----
+    // Highlight selected country
     if (state.level === "country" && state.selectedCountry) {
         g.selectAll(".cells rect")
             .attr("stroke", d => d.name === state.selectedCountry
@@ -293,7 +296,7 @@ export function renderHeatmap(container, state) {
             .attr("stroke-width", d => d.name === state.selectedCountry ? 2 : 0.5);
     }
 
-    // ---- Y axis (row labels) ----
+    // Y axis (row labels)
     g.append("g")
         .attr("class", "y-axis")
         .call(d3.axisLeft(y).tickSize(0))
@@ -301,7 +304,7 @@ export function renderHeatmap(container, state) {
         .selectAll("text")
         .style("font-size", "12px");
 
-    // ---- X axis (years, thinned) ----
+    // X axis (years, thinned)
     const tickYears = years.filter(y => y % 5 === 0);
     g.append("g")
         .attr("class", "x-axis")
@@ -316,7 +319,7 @@ export function renderHeatmap(container, state) {
         .selectAll("text")
         .style("font-size", "11px");
 
-    // ---- Header (title + legend) + back button ----
+    // Header (title + legend) + back button
     const header = d3.select(el).insert("div", ":first-child")
         .attr("class", "view-header");
 
@@ -332,14 +335,14 @@ export function renderHeatmap(container, state) {
             .on("click", () => backToContinents());
     }
 
-    // ---- Caption ----
+
     d3.select(el).append("p")
         .attr("class", "heatmap-note")
         .text("Hatched cells indicate years with no reported data for that entity. " +
             "2024–2025 are incomplete for many aggregates.");
 }
 
-// ---------- Legend ----------
+// Legend
 function drawLegend(container) {
     const w = 220, h = 10;
     const legend = d3.select(container)
