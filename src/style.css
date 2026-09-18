@@ -189,3 +189,285 @@ button:hover {
         font-size: 24px;
     }
 }
+/* ---------- Stacked area ---------- */
+.stack-subtitle {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7785;
+}
+
+.stack-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.stack-empty {
+    font-size: 13px;
+    color: #8a94a0;
+    font-style: italic;
+    margin: 24px 0;
+}
+
+.stack-grid line {
+    stroke: #eef1f4;
+    shape-rendering: crispEdges;
+}
+
+.stack-x-axis text,
+.stack-y-axis text {
+    font-size: 11px;
+    fill: #6b7785;
+}
+
+.stack-x-axis line,
+.stack-y-axis line {
+    stroke: #d7dde3;
+}
+
+.stack-direct-labels text {
+    font-size: 11px;
+    fill: #44505c;
+    font-weight: 500;
+}
+
+.stack-crosshair {
+    stroke: #0b2545;
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* ---------- Stacked-area legend ---------- */
+.stack-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.stack-legend-item {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11.5px;
+    color: #44505c;
+    white-space: nowrap;
+}
+
+.stack-legend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 6px;
+    flex: none;
+}
+
+.stack-legend-swatch-hatch,
+.stack-tip-swatch-hatch {
+    background: repeating-linear-gradient(
+        45deg,
+        #f2f4f6 0 2px,
+        #cfd6dd 2px 3px
+    );
+    border: 1px solid #dde2e8;
+}
+
+/* ---------- Stacked-area tooltip ---------- */
+.stack-tooltip {
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 9px 11px;
+    font-size: 12px;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    min-width: 186px;
+}
+
+.stack-tip-head {
+    font-size: 12px;
+    margin-bottom: 6px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+    color: #0b2545;
+}
+
+.stack-tip-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    line-height: 1.6;
+}
+
+.stack-tip-swatch {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    flex: none;
+}
+
+.stack-tip-label {
+    flex: 1;
+    color: #44505c;
+}
+
+.stack-tip-value {
+    color: #1a1a1a;
+    font-variant-numeric: tabular-nums;
+}
+
+.stack-tip-remainder .stack-tip-label,
+.stack-tip-remainder .stack-tip-value {
+    color: #8a94a0;
+    font-style: italic;
+}
+
+.stack-tip-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 6px;
+    padding-top: 5px;
+    border-top: 1px solid #eee;
+    font-size: 11.5px;
+    color: #44505c;
+}
+
+.stack-tip-nodata {
+    font-size: 11.5px;
+    color: #8a94a0;
+    font-style: italic;
+}
+
+/* ---------- Stacked-area data table ---------- */
+.stack-table-wrap {
+    margin-top: 10px;
+}
+
+.stack-table-toggle {
+    font-size: 12px;
+    padding: 4px 10px;
+}
+
+.stack-table-box {
+    max-height: 300px;
+    overflow: auto;
+    margin-top: 10px;
+    border: 1px solid #e1e5ea;
+    border-radius: 6px;
+}
+
+.stack-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.stack-table caption {
+    caption-side: top;
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #6b7785;
+    font-style: italic;
+}
+
+.stack-table th,
+.stack-table td {
+    padding: 4px 10px;
+    text-align: right;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.stack-table thead th {
+    position: sticky;
+    top: 0;
+    background: #f7f9fb;
+    color: #0b2545;
+    font-weight: 600;
+    text-align: right;
+    z-index: 1;
+}
+
+.stack-table tbody th[scope="row"] {
+    text-align: left;
+    font-weight: 500;
+    color: #44505c;
+}
+
+.stack-table thead th:first-child {
+    text-align: left;
+}
+
+.stack-table-total {
+    color: #6b7785;
+}
+
+.stack-table-nodata {
+    text-align: left;
+    color: #8a94a0;
+    font-style: italic;
+}
+
+/* ---------- Stacked-area entity picker ---------- */
+.stack-picker {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: none;
+}
+
+.stack-picker label {
+    font-size: 12px;
+    color: #6b7785;
+    white-space: nowrap;
+}
+
+.stack-select {
+    font-size: 13px;
+    font-family: inherit;
+    color: #0b2545;
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 6px 10px;
+    max-width: 230px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.stack-select:hover {
+    border-color: #2171b5;
+}
+
+.stack-select:focus-visible {
+    outline: 2px solid #2171b5;
+    outline-offset: 1px;
+}
+
+/* ---------- Stacked-area Δ window disclosure ---------- */
+.stack-window {
+    margin: 0;
+    font-size: 11.5px;
+    color: #6b7785;
+    font-variant-numeric: tabular-nums;
+}
+
+/* A window shorter than 1985–2025 is flagged, because the Δ shown is then
+   not comparable with a full-period figure without adjusting for span. */
+.stack-window-partial {
+    color: #8a5a00;
+    background: #fff8e6;
+    border-left: 2px solid #e0a800;
+    padding: 2px 8px;
+    border-radius: 0 3px 3px 0;
+    display: inline-block;
+}
