@@ -68,6 +68,10 @@ body {
     min-height: 400px;
 }
 
+#scatterplot-container {
+    grid-column: 1 / -1;
+}
+
 #stacked-area-container {
     grid-column: 1 / -1;
 }
@@ -161,6 +165,144 @@ button:hover {
     line-height: 1.5;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     z-index: 1000;
+}
+
+/* ---------- Scatterplot ---------- */
+.scatter-subtitle,
+.scatter-note {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7785;
+}
+
+.scatter-note {
+    margin-top: 8px;
+    line-height: 1.45;
+}
+
+.scatter-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #44505c;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.scatter-filter input {
+    accent-color: #2171b5;
+}
+
+.scatter-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 13px;
+}
+
+.scatter-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #53606d;
+}
+
+.scatter-legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.scatter-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.scatter-grid line {
+    stroke: #edf0f3;
+}
+
+.scatter-zero {
+    stroke: #7b8794;
+    stroke-width: 1.2;
+}
+
+.scatter-trend {
+    stroke: #0b2545;
+    stroke-width: 1.5;
+    stroke-dasharray: 6 5;
+    opacity: 0.7;
+}
+
+.scatter-x-axis text,
+.scatter-y-axis text {
+    fill: #6b7785;
+    font-size: 11px;
+}
+
+.scatter-x-axis line,
+.scatter-y-axis line,
+.scatter-x-axis path,
+.scatter-y-axis path {
+    stroke: #cfd6dd;
+}
+
+.scatter-axis-title {
+    fill: #44505c;
+    font-size: 11.5px;
+    font-weight: 500;
+}
+
+.scatter-tooltip {
+    min-width: 290px;
+    max-width: 340px;
+    background: #ffffff;
+    border: 1px solid #cfd6dd;
+    border-radius: 6px;
+    padding: 10px 12px;
+    box-shadow: 0 3px 12px rgba(11, 37, 69, 0.16);
+    z-index: 1000;
+    font-size: 11.5px;
+}
+
+.scatter-tip-head {
+    color: #0b2545;
+    padding-bottom: 6px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.scatter-tip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    line-height: 1.65;
+}
+
+.scatter-tip-row span {
+    color: #6b7785;
+}
+
+.scatter-tip-row strong {
+    color: #1a1a1a;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.scatter-tip-action {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #edf0f3;
+    color: #3769b0;
+}
+
+.scatter-empty {
+    color: #8a94a0;
+    font-size: 13px;
+    font-style: italic;
 }
 
 /* ---------- Page footer ---------- */
